@@ -1,0 +1,11 @@
+- hosts: all
+  roles:
+    - common
+
+- hosts: masters
+  roles:
+    - kubernetes-master
+
+- hosts: workers
+  roles:
+    - kubernetes-worker
