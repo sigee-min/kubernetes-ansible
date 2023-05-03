@@ -5,18 +5,17 @@
 
 - name: Display requirements message
   debug:
-    msg:
-      - "#### Requirements ####"
-      - "arch: arm, os: ubuntu20.04"
-      - "######################"
+    msg: "arch: arm, os: ubuntu20.04"
 
 - name: Stop and disable ufw
+  become: yes
   systemd:
     name: ufw
     state: stopped
     enabled: no
 
 - name: Create containerd config file
+  become: yes
   copy:
     content: |
       overlay
@@ -24,6 +23,7 @@
     dest: /etc/modules-load.d/containerd.conf
 
 - name: Load overlay and br_netfilter modules
+  become: yes
   modprobe:
     name: "{{ item }}"
     state: present
@@ -32,6 +32,7 @@
     - br_netfilter
 
 - name: Create Kubernetes CRI sysctl config
+  become: yes
   copy:
     content: |
       net.bridge.bridge-nf-call-iptables  = 1
@@ -40,9 +41,11 @@
     dest: /etc/sysctl.d/99-kubernetes-cri.conf
 
 - name: Apply sysctl settings
+  become: yes
   command: sysctl --system
 
 - name: Update and install required packages
+  become: yes
   apt:
     name: "{{ item }}"
     state: present
@@ -55,35 +58,42 @@
     - lsb-release
 
 - name: Add Docker GPG key
+  become: yes
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     keyring: /usr/share/keyrings/docker-archive-keyring.gpg
 
 - name: Add Docker apt repository
+  become: yes
   apt_repository:
     repo: "deb [arch=arm64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
 
 - name: Install containerd.io
+  become: yes
   apt:
     name: containerd.io
     state: present
     update_cache: yes
 
 - name: Create containerd config directory
+  become: yes
   file:
     path: /etc/containerd
     state: directory
 
 - name: Generate and save containerd config
+  become: yes
   shell: containerd config default > /etc/containerd/config.toml
 
 - name: Restart containerd service
+  become: yes
   systemd:
     name: containerd
     state: restarted
 
 - name: Create Docker daemon config
+  become: yes
   copy:
     content: |
       {
@@ -97,15 +107,18 @@
     dest: /etc/docker/daemon.json
 
 - name: Disable swap
+  become: yes
   command: swapoff -a
 
 - name: Comment swap in /etc/fstab
+  become: yes
   replace:
     path: /etc/fstab
     regexp: '^(.+ swap .+)$'
     replace: '#\1'
 
 - name: Install additional required packages
+  become: yes
   apt:
     name: "{{ item }}"
     state: present
@@ -115,16 +128,19 @@
     - curl
 
 - name: Add Kubernetes GPG key
+  become: yes
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     keyring: /usr/share/keyrings/kubernetes-archive-keyring.gpg
 
 - name: Add Kubernetes apt repository
+  become: yes
   apt_repository:
     repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
 
 - name: Update and install Kubernetes components
+  become: yes
   apt:
     name: "{{ item }}"
     state: present
@@ -137,12 +153,14 @@
     - kubectl={{ version }}
 
 - name: Create k8s config file
+  become: yes
   copy:
     content: |
       br_netfilter
     dest: /etc/modules-load.d/k8s.conf
 
 - name: Create k8s sysctl config
+  become: yes
   copy:
     content: |
       net.bridge.bridge-nf-call-ip6tables = 1
@@ -150,9 +168,11 @@
     dest: /etc/sysctl.d/k8s.conf
 
 - name: Remove iptables reject rules
+  become: yes
   shell: |
     iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
     iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
 
 - name: Apply sysctl settings again
+  become: yes
   command: sysctl --system
