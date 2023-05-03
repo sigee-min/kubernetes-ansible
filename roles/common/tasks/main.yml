@@ -92,20 +92,6 @@
     name: containerd
     state: restarted
 
-- name: Create Docker daemon config
-  become: yes
-  copy:
-    content: |
-      {
-        "exec-opts": ["native.cgroupdriver=systemd"],
-        "log-driver": "json-file",
-        "log-opts": {
-          "max-size": "100m"
-        },
-        "storage-driver": "overlay2"
-      }
-    dest: /etc/docker/daemon.json
-
 - name: Disable swap
   become: yes
   command: swapoff -a
