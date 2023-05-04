@@ -113,13 +113,11 @@
 
 - name: Add Kubernetes apt repository
   become: yes
-  register: apt_reg
-  until: apt_reg is success
-  delay: 30
-  retries: 10
   apt_repository:
     repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
+    update_cache: true
+    filename: kubernetes.list
 
 - name: Update and install Kubernetes components
   become: yes
