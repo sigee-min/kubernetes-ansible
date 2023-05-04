@@ -119,15 +119,15 @@
 
 - name: Update and install Kubernetes components
   become: yes
+  register: apt_state
+  until: apt_state is success
+  delay: 30
+  retries: 10
   apt:
     name: "{{ item }}"
     state: present
     force_apt_get: yes
     update_cache: yes
-    register: apt_state
-    until: apt_state is success
-    delay: 30
-    retries: 10
   vars:
     version: "1.26.3-00"
   loop:
