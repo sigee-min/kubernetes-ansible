@@ -125,6 +125,14 @@
     repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
 
+- name: Wait for apt lock
+  become: yes
+  command: "flock -w 600 /var/lib/dpkg/lock-frontend --command true"
+  retries: 10
+  delay: 30
+  register: result
+  until: result.rc == 0
+
 - name: Update and install Kubernetes components
   become: yes
   apt:
