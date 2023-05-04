@@ -44,6 +44,12 @@
     - gnupg
     - lsb-release
 
+- name: Add Docker GPG key
+  become: yes
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    keyring: /usr/share/keyrings/docker-archive-keyring.gpg
+
 - name: Add Docker repository
   become: yes
   ansible.builtin.apt_repository:
@@ -51,12 +57,6 @@
     state: present
     update_cache: yes
     cache_valid_time: 3600
-
-- name: Add Docker GPG key
-  become: yes
-  ansible.builtin.apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
-    keyring: /usr/share/keyrings/docker-archive-keyring.gpg
 
 - name: Update apt cache
   become: yes
