@@ -117,12 +117,6 @@
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     keyring: /usr/share/keyrings/kubernetes-archive-keyring.gpg
 
-- name: Run apt upgrade
-  apt:
-    upgrade: "yes"
-    update_cache: yes
-    cache_valid_time: 432000
-
 - name: Add Kubernetes apt repository
   become: yes
   apt_repository:
