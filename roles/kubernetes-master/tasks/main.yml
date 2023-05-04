@@ -47,14 +47,6 @@
     name: kubelet
     state: stopped
 
-- name: Flush iptables
-  become: yes
-  command: iptables --flush
-
-- name: Flush iptables NAT table
-  become: yes
-  command: iptables -tnat --flush
-
 - name: Start kubelet service
   become: yes
   systemd:
