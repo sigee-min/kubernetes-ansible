@@ -57,6 +57,11 @@
     state: present
     update_cache: yes
 
+- name: Update apt cache
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+
 - name: Install containerd.io
   become: yes
   apt:
