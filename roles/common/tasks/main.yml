@@ -32,10 +32,6 @@
       net.bridge.bridge-nf-call-ip6tables = 1
     dest: /etc/sysctl.d/99-kubernetes-cri.conf
 
-- name: Apply sysctl settings
-  become: yes
-  command: sysctl --system
-
 - name: Update and install required packages
   become: yes
   apt:
