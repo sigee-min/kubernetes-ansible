@@ -1,55 +1,82 @@
 ---
+- name: Check if Kubernetes is already initialized
+  become: yes
+  command: kubeadm token list
+  register: kubeadm_token_list
+  ignore_errors: yes
+  changed_when: false
+
 - name: Initialize Kubernetes cluster
+  become: yes
   command: >
-    sudo kubeadm init --pod-network-cidr=192.168.0.0/16 \
+    kubeadm init --pod-network-cidr=192.168.0.0/16 \
     --apiserver-advertise-address={{ ansible_default_ipv4.address }} \
     --control-plane-endpoint={{ ansible_default_ipv4.address }} \
     --apiserver-cert-extra-sans={{ ansible_default_ipv4.address }}
+  when: kubeadm_token_list.rc != 0
 
 - name: Create .kube directory
   become: yes
   file:
     path: "{{ ansible_env.HOME }}/.kube"
     state: directory
+  when: kubeadm_token_list.rc != 0
 
 - name: Remove existing Kubernetes config
   become: yes
   file:
     path: "{{ ansible_env.HOME }}/.kube/config"
     state: absent
+  when: kubeadm_token_list.rc != 0
 
 - name: Copy admin.conf to .kube directory
   become: yes
   command: >
     cp -i /etc/kubernetes/admin.conf {{ ansible_env.HOME }}/.kube/config
+  when: kubeadm_token_list.rc != 0
 
 - name: Change ownership of Kubernetes config
   become: yes
   command: >
     chmod 777 {{ ansible_env.HOME }}/.kube/config
+  when: kubeadm_token_list.rc != 0
 
 - name: Copy admin.conf to current directory
   become: yes
   command: cp -i /etc/kubernetes/admin.conf ./
+  when: kubeadm_token_list.rc != 0
 
 - name: Download Calico manifest
   become: yes
   get_url:
     url: "https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/calico.yaml"
     dest: "calico.yaml"
+  when: kubeadm_token_list.rc != 0
 
 - name: Apply Calico manifest
   command: kubectl apply -f calico.yaml
+  when: kubeadm_token_list.rc != 0
 
 - name: Stop kubelet service
   become: yes
   systemd:
     name: kubelet
     state: stopped
+  when: kubeadm_token_list.rc != 0
 
 - name: Start kubelet service
   become: yes
   systemd:
     name: kubelet
     state: started
+  when: kubeadm_token_list.rc != 0
 
+- name: Create a new kubeadm join token and print the join command
+  become: yes
+  command: kubeadm token create --print-join-command
+  register: kubeadm_join_command_output
+
+- name: Set the kubeadm_join_command variable for the master node
+  become: yes
+  set_fact:
+    kubeadm_join_command: "{{ kubeadm_join_command_output.stdout }}"
