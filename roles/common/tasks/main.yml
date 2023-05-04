@@ -131,9 +131,9 @@
   vars:
     version: "1.26.3-00"
   loop:
+    - kubectl={{ version }}
     - kubelet={{ version }}
     - kubeadm={{ version }}
-    - kubectl={{ version }}
 
 - name: Create k8s config file
   become: yes
