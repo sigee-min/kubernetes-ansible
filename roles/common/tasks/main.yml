@@ -1,12 +1,4 @@
 ---
-- name: Display installing k8s message
-  debug:
-    msg: "installing k8s"
-
-- name: Display requirements message
-  debug:
-    msg: "arch: arm, os: ubuntu20.04"
-
 - name: Stop and disable ufw
   become: yes
   systemd:
@@ -125,14 +117,6 @@
     repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
 
-- name: Wait for apt lock
-  become: yes
-  command: "flock -w 600 /var/lib/dpkg/lock-frontend --command true"
-  retries: 10
-  delay: 30
-  register: result
-  until: result.rc == 0
-
 - name: Update and install Kubernetes components
   become: yes
   apt:
@@ -140,6 +124,10 @@
     state: present
     force_apt_get: yes
     update_cache: yes
+    register: apt_state
+    until: apt_state is success
+    delay: 30
+    retries: 10
   vars:
     version: "1.26.3-00"
   loop:
