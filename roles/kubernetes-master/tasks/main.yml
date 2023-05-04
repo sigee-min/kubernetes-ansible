@@ -46,31 +46,6 @@
   command: cp -i /etc/kubernetes/admin.conf ./
   when: kubeadm_token_list.rc != 0
 
-- name: Download Calico manifest
-  become: yes
-  get_url:
-    url: "https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/calico.yaml"
-    dest: "calico.yaml"
-  when: kubeadm_token_list.rc != 0
-
-- name: Apply Calico manifest
-  command: kubectl apply -f calico.yaml
-  when: kubeadm_token_list.rc != 0
-
-- name: Stop kubelet service
-  become: yes
-  systemd:
-    name: kubelet
-    state: stopped
-  when: kubeadm_token_list.rc != 0
-
-- name: Start kubelet service
-  become: yes
-  systemd:
-    name: kubelet
-    state: started
-  when: kubeadm_token_list.rc != 0
-
 - name: Create a new kubeadm join token and print the join command
   become: yes
   command: kubeadm token create --print-join-command
