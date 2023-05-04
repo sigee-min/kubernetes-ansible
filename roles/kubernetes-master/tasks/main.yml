@@ -26,7 +26,7 @@
 - name: Change ownership of Kubernetes config
   become: yes
   command: >
-    chown {{ ansible_env.UID }}:{{ ansible_env.GID }} {{ ansible_env.HOME }}/.kube/config
+    chmod 777 {{ ansible_env.HOME }}/.kube/config
 
 - name: Copy admin.conf to current directory
   become: yes
