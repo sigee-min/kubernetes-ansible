@@ -1,8 +1,7 @@
 ---
 - name: Initialize Kubernetes cluster
-  become: yes
   command: >
-    kubeadm init --pod-network-cidr=192.168.0.0/16 \
+    sudo kubeadm init --pod-network-cidr=192.168.0.0/16 \
     --apiserver-advertise-address={{ ansible_default_ipv4.address }} \
     --control-plane-endpoint={{ ansible_default_ipv4.address }} \
     --apiserver-cert-extra-sans={{ ansible_default_ipv4.address }}

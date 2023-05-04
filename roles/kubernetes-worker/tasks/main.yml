@@ -1,4 +1,3 @@
 ---
 - name: Join Kubernetes worker to the cluster
-  become: yes
-  command: kubeadm join --token {{ hostvars['master']['kubeadm_join_token'] }} {{ hostvars['master']['ansible_host'] }}:6443 --discovery-token-ca-cert-hash sha
+  command: sudo kubeadm join --token {{ hostvars['master']['kubeadm_join_token'] }} {{ hostvars['master']['ansible_host'] }}:6443 --discovery-token-ca-cert-hash sha
