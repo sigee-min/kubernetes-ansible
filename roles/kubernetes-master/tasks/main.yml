@@ -1,5 +1,6 @@
 ---
 - name: Initialize Kubernetes cluster
+  become: yes
   command: >
     kubeadm init --pod-network-cidr=192.168.0.0/16 \
     --apiserver-advertise-address={{ ansible_default_ipv4.address }} \
@@ -7,27 +8,33 @@
     --apiserver-cert-extra-sans={{ ansible_default_ipv4.address }}
 
 - name: Create .kube directory
+  become: yes
   file:
     path: "{{ ansible_env.HOME }}/.kube"
     state: directory
 
 - name: Remove existing Kubernetes config
+  become: yes
   file:
     path: "{{ ansible_env.HOME }}/.kube/config"
     state: absent
 
 - name: Copy admin.conf to .kube directory
+  become: yes
   command: >
     cp -i /etc/kubernetes/admin.conf {{ ansible_env.HOME }}/.kube/config
 
 - name: Change ownership of Kubernetes config
+  become: yes
   command: >
     chown {{ ansible_env.UID }}:{{ ansible_env.GID }} {{ ansible_env.HOME }}/.kube/config
 
 - name: Copy admin.conf to current directory
+  become: yes
   command: cp -i /etc/kubernetes/admin.conf ./
 
 - name: Download Calico manifest
+  become: yes
   get_url:
     url: "https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/calico.yaml"
     dest: "calico.yaml"
