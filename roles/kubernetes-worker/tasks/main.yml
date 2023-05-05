@@ -6,4 +6,5 @@
 
 - name: Join Kubernetes worker to the cluster
   command: sudo {{ hostvars[groups['masters'][0]]['kubeadm_join_command'] }}
-  when: k8s_worker_node.stdout != inventory_hostname
+  when: not kubelet_conf.stat.exists
+
