@@ -1,10 +1,8 @@
 ---
-- name: Check if the worker node is already part of the cluster
-  delegate_to: "{{ groups['masters'][0] }}"
-  shell: kubectl get nodes -o jsonpath='{.items[?(@.metadata.name=="{{ inventory_hostname }}")].metadata.name}'
-  register: k8s_worker_node
-  ignore_errors: true
-  changed_when: false
+- name: Check if kubelet.conf file exists
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf
 
 - name: Join Kubernetes worker to the cluster
   command: sudo {{ hostvars[groups['masters'][0]]['kubeadm_join_command'] }}
